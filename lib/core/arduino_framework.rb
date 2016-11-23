@@ -1,8 +1,8 @@
 #!/usr/lib/env ruby
 
 class ArduinoFramework
-	def initialize(ARGV)
-		@board = ArduinoFirmata.connect ARGV.shift
+	def initialize
+		@board = ArduinoFirmata.connect 
 		@store = Store.new
 	end
 
@@ -15,26 +15,28 @@ class ArduinoFramework
 	# tag		: I think if get this can know witch is about
 	# desc		: Description
 	#
-	def reg_interface(intface, pin, val=nil, tag="", desc="")
-		return unless @store.has_pin?(pin)
+	def reg_interface(iface, pin, val=nil, tag="", desc="")
+		if not @store.has_pin?(iface, pin)
+			return "The pin:#{pin} was registed"
+		end
 		if val == nil
-			if interface == Interface::Analog
+			if iface == Interface::Analog
 				@board.analog_read pin
-			elsif interface == Interface::Digital
+			elsif iface == Interface::Digital
 				@board.digital_read pin
 			else
 				return
 			end
 		else
-			if interface == Interface::Analog
+			if iface == Interface::Analog
 				@board.analog_write pin, val
-			elsif interface == Interface::Digital
+			elsif iface == Interface::Digital
 				@board.digital_write pin, val
 			else
 				return
 			end
 		end
-		@store.insert(interface, pin, val, tag, desc)
+		@store.insert(iface, pin, val, tag, desc)
 	end
 
 	def reg_digital(pin, val=nil, tag="", desc="")
@@ -46,9 +48,10 @@ class ArduinoFramework
 	end
 
 	def reg_module(mod, opt={})
-		return unless mod = nil
+		return if mod == nil
 		begin
 			self.extend(mod)
+			$stdout.puts "import #{mod} Success"
 		rescue
 			raise "Module #{mod} is inavaild"
 		end
