@@ -16,25 +16,13 @@ class ArduinoFramework
 	# desc		: Description
 	#
 	def reg_interface(iface, pin, val=nil, tag="", desc="")
-		if not @store.has_pin?(iface, pin)
+		if @store.has_pin?(iface, pin)
 			return "The pin:#{pin} was registed"
 		end
-		if val == nil
-			if iface == Interface::Analog
-				@board.analog_read pin
-			elsif iface == Interface::Digital
-				@board.digital_read pin
-			else
-				return
-			end
-		else
-			if iface == Interface::Analog
-				@board.analog_write pin, val
-			elsif iface == Interface::Digital
-				@board.digital_write pin, val
-			else
-				return
-			end
+		if iface == Interface::Digital
+			self.digital pin, val
+		elsif iface == Interface::Analog
+			self.analog pin, val
 		end
 		@store.insert(iface, pin, val, tag, desc)
 	end
@@ -55,6 +43,39 @@ class ArduinoFramework
 		rescue
 			raise "Module #{mod} is inavaild"
 		end
+	end
+
+	def analog pin, val=nil
+		if val == nil
+			@board.analog_read pin
+		else
+			@board.analog_write pin, val
+		end
+	end
+
+	def analog_read pin
+		self.analog pin
+	end
+
+	def analog_write pin, val
+		raise "val is Null" if val.nil?
+		self.analog pin, val
+	end
+
+	def digital pin, val=nil
+		if val == nil
+			@board.digital_read pin
+		else
+			@board.digital_write pin,val
+		end
+	end
+
+	def digital_read pin
+		self.digital pin
+	end
+
+	def digital_write pin, val
+		raise "val is Null" if val.nil?
 	end
 end
 

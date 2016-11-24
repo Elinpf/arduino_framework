@@ -15,7 +15,7 @@ class Store < Hash
 	#	
 	def has_pin?(iface, pin)
 		raise "Must input Fixnum" unless iface.kind_of? Fixnum and pin.kind_of? Fixnum
-		return true if self.empty?
+		return false if self.empty?
 	# 找出interface 和 pin 都相等的
 		self.each_with_index do |v,i|
 			if i%5 == 1
@@ -24,9 +24,9 @@ class Store < Hash
 
 			break if not i%5 == 2
 
-			return false if v == pin
+			return true if v == pin
 		end
-		return true
+		return false
 	end
 
 	#

@@ -56,6 +56,6 @@ module Rocker
 		rx = rocker_read_rx
 		ry = rocker_read_ry
 		rg = rocker_read_rg
-		printf("X:%10s Y:%10s G:%10s\n",rx,ry,rg)
+		printf("X: %-4s Y: %-4s SW: %5s\n",rx,ry,rg)
 	end
 end
