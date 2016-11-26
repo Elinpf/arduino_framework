@@ -1,10 +1,8 @@
 load "core.rb"
 
 board = ArduinoFramework.new
-board.reg_module(Rocker)
-p board.rocker_set_all(0,1,7)
 
-loop do
-board.rocker_read_all
-end
+board = Module_::Rocker.new(board)
+board.rocker_setup 0,1,7
+p board.get_store
 

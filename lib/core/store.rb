@@ -29,12 +29,16 @@ class Store < Hash
 		return false
 	end
 
+	def has_id? id
+		self.has_key? id
+	end
+
 	#
 	# Insert pin val and Description
-	# {Interface => [pin, val, tag, desc]
+	# {id => [iface, pin, val, desc]
 	#
-	def insert(iface, pin, val, tag, desc='')
-		self[iface] = [pin, val, tag, desc]
+	def insert(id, iface, pin, mode, desc='')
+		self[id] = [iface, pin, mode, desc]
 	end
 	
 	def inspect

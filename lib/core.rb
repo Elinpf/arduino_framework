@@ -8,6 +8,7 @@ require "arduino_firmata"
 require "core/arduino_framework"
 require "core/constant"
 require "core/store"
+require "core/module"
 
 # The modules
 require "module"

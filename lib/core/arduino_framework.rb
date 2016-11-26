@@ -1,56 +1,54 @@
 #!/usr/lib/env ruby
 
 class ArduinoFramework
+	attr_reader :store
 	def initialize
-		@board = ArduinoFirmata.connect 
+		@framework = ArduinoFirmata.connect 
 		@store = Store.new
 	end
 
 	#
-	# Register the Interface PIN, and Store in Hash, 
-	# Then erveryone can't use this PIN
+	# 注册只有两个用途
+	#   1.初始化
+	#   2.相关信息写入到Store中
+	#
+	# id		: 唯一标识，Store查询
 	# interface	: Digital or Analog
 	# pin 		: Number of the Interface
-	# value		: The Pin value if not, is Read
-	# tag		: I think if get this can know witch is about
+	# mode		: 这个mode只为Digital使用
 	# desc		: Description
 	#
-	def reg_interface(iface, pin, val=nil, tag="", desc="")
-		if @store.has_pin?(iface, pin)
-			return "The pin:#{pin} was registed"
+	def reg_interface(id, iface, pin, mode=nil, desc="")
+		# 这里要做修改，如果有，则更新。 如果没有，则添加
+		if @store.has_id?(id)
+			return "The Module:#{id} was registed"
 		end
 		if iface == Interface::Digital
-			self.digital pin, val
+			if mode.nil?
+				@store.insert(id, iface, pin, mode, desc)
+			else
+				@framework.pin_mode(pin, mode)
+				@store.insert(id, iface, pin, mode, desc)
+			end
 		elsif iface == Interface::Analog
-			self.analog pin, val
+			@store.insert(id, iface, pin, mode, desc)
 		end
-		@store.insert(iface, pin, val, tag, desc)
+		@store
 	end
 
-	def reg_digital(pin, val=nil, tag="", desc="")
-		reg_interface(Interface::Digital, pin, val, tag, desc)
+	def reg_analog id, pin, desc
+		reg_interface id, Interface::Analog, pin, nil, dsec 	
 	end
 
-	def reg_analog(pin, val=nil, tag="", desc="")
-		reg_interface(Interface::Analog, pin, val, tag, desc)
+	def reg_digital id, pin, mode=nil, desc
+		reg_interface id, Interface::Digital, pin, mode, desc
 	end
 
-	def reg_module(mod, opt={})
-		return if mod == nil
-		begin
-			self.extend(mod)
-			$stdout.puts "import #{mod} Success"
-		rescue
-			raise "Module #{mod} is inavaild"
-		end
-	end
-
-	def analog pin, val=nil
-		if val == nil
-			@board.analog_read pin
-		else
-			@board.analog_write pin, val
-		end
+	#
+	# 添加模块，暂时还没有想好
+	#
+	def add_module(mod)
+		return if mod.empty?
 	end
 
 	def analog_read pin
@@ -62,13 +60,6 @@ class ArduinoFramework
 		self.analog pin, val
 	end
 
-	def digital pin, val=nil
-		if val == nil
-			@board.digital_read pin
-		else
-			@board.digital_write pin,val
-		end
-	end
 
 	def digital_read pin
 		self.digital pin
