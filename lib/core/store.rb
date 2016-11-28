@@ -7,6 +7,7 @@
 class Store < Hash
 	def initialize 
 		super
+		@data = []
 	end
 
 	#
@@ -43,5 +44,26 @@ class Store < Hash
 	
 	def inspect
 		super
+		# 取注册了的接口
+		# 取列中最长长度
+		self.keys.sort do |k1, k2|
+			k1.size <=> k2.size
+		end
+		
+	end
+
+	def value_size
+		self.each_pair do |k,v|
+			return v.size
+		end
+	end
+
+	def update(digital, analog)
+		@data = [digital, analog]
+	end
+
+	def read_data
+		p self
+		@data
 	end
 end

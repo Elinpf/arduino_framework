@@ -1,10 +1,14 @@
 #!/usr/lib/env ruby
+require "observer"
 
 class ArduinoFramework
-	attr_reader :store
+	attr_reader :store, :framework
+	include Observable
+
 	def initialize
-		@framework = ArduinoFirmata.connect 
+		@firmata = ArduinoFirmata.connect 
 		@store = Store.new
+		add_observer(@store)
 	end
 
 	#
@@ -27,7 +31,7 @@ class ArduinoFramework
 			if mode.nil?
 				@store.insert(id, iface, pin, mode, desc)
 			else
-				@framework.pin_mode(pin, mode)
+				@firmata.pin_mode(pin, mode)
 				@store.insert(id, iface, pin, mode, desc)
 			end
 		elsif iface == Interface::Analog
@@ -48,25 +52,44 @@ class ArduinoFramework
 	# 添加模块，暂时还没有想好
 	#
 	def add_module(mod)
-		return if mod.empty?
+		return false if mod.empty?
+		str = %q^Module_::#{mod}.new(self);^
+		eval(str)
 	end
 
-	def analog_read pin
-		self.analog pin
+	def analog_data
+		data = Array.new(16, 0)
+		16.times do |pin|
+			data[pin] = @firmata.analog_read pin
+		end
+		data
 	end
 
-	def analog_write pin, val
-		raise "val is Null" if val.nil?
-		self.analog pin, val
+	def digital_input_data
+		data = Array.new(16,0)
+		16.times do |pin|
+			data[pin] = @firmata.digital_read pin
+		end
+		data
 	end
 
-
-	def digital_read pin
-		self.digital pin
+	#
+	# 将Digital 和 Analog 的数据以观察者模式发送出去
+	# 观察者一定要用update 方法接收
+	#
+	def start
+		@notify = Thread.new do 
+			loop do
+				changed
+				notify_observers(digital_input_data,
+					analog_data)
+				sleep 0.1
+			end
+		end
 	end
 
-	def digital_write pin, val
-		raise "val is Null" if val.nil?
+	def stop
+		@notify.stop
 	end
-end
+end	#class
 

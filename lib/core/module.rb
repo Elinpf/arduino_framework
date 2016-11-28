@@ -62,5 +62,12 @@ class Module
 		"Unknow"
 	end
 
+	#
+	# 只读取模块的接口信息
+	#
+	def read_module
+		name = self.module_name
+	end
+
 end	#class
 end	#module
