@@ -7,6 +7,7 @@
 class Store < Hash
 	def initialize 
 		super
+		@head = ["ID", "iface", "Pin", "mode",  "Description"]
 		@data = []
 	end
 
@@ -43,13 +44,7 @@ class Store < Hash
 	end
 	
 	def inspect
-		super
-		# 取注册了的接口
-		# 取列中最长长度
-		self.keys.sort do |k1, k2|
-			k1.size <=> k2.size
-		end
-		
+		self.sheet	
 	end
 
 	def value_size
@@ -63,7 +58,81 @@ class Store < Hash
 	end
 
 	def read_data
-		p self
-		@data
+		self
+	end
+
+	#
+	# 这个方法是用来将Hash转化成为数组
+	# 并且保证数组中没有进一步的数组
+	#
+	def to_a
+		new_array = Array.new
+		self.each_pair do |k,vs|
+			new_array << k
+			vs.each do |v|
+				new_array << v
+			end
+		end
+		return new_array
+	end
+
+	#
+	# 按表格输出
+	#
+	def sheet
+		num = @head.size
+		tab_tmp = @head.clone
+
+		col_size = Array.new
+		cols = Array.new
+		
+
+		col_size << self.keys.sort{|x,y| x.size <=> y.size}[-1].size + 1
+		tab_tmp.shift
+		(num-1).times do |t|
+			cols[t] = Array.new
+			self.each_pair do |k,v|
+				cols[t] << v[t]
+			end
+			cols[t].unshift tab_tmp[t]
+		end
+
+		cols.each do |col|
+			col_size << col.sort {|x,y| 
+				x.to_s.size <=> y.to_s.size}.last.size + 1
+		end
+
+		table = ""
+		self.to_a.each_with_index do |val,i|
+			val = val.to_s
+			if i == 0
+				table << "+"
+				col_size.each do |t|
+					table << "-" * t + "+"
+				end
+				table << "\n"
+				@line_code = table.clone
+				table << "|"
+				@head.each_with_index do |h,i|
+					table << h
+					table << " " * (col_size[i] - h.size)
+					table << "|"
+				end
+				table << "\n"
+				table << @line_code
+			end
+			eve = i % col_size.size
+			if eve == 0
+				table << "|"
+			end
+			table << val
+			table << " " * (col_size[eve] - val.size)
+			table << "|"
+			if eve == (col_size.size - 1)
+				table << "\n"
+				table << @line_code
+			end
+		end
+		print table
 	end
 end

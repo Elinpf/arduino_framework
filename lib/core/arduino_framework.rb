@@ -53,8 +53,8 @@ class ArduinoFramework
 	#
 	def add_module(mod)
 		return false if mod.empty?
-		str = %q^Module_::#{mod}.new(self);^
-		eval(str)
+		return false if Module_.const_defined? mod.to_sym
+		(Module_.const_get mod.to_sym).new(self)
 	end
 
 	def analog_data
